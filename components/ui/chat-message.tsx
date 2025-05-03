@@ -13,9 +13,10 @@ import {
 } from "@/components/ui/collapsible"
 import { FilePreview } from "@/components/ui/file-preview"
 import { MarkdownRenderer } from "@/components/ui/markdown-renderer"
+import { ChatAvatar } from "@/components/ui/chat-avatar"
 
 const chatBubbleVariants = cva(
-  "group/message relative break-words rounded-lg p-3 text-sm sm:max-w-[70%]",
+  "group/message relative break-words rounded-lg p-3 text-sm",
   {
     variants: {
       isUser: {
@@ -149,32 +150,45 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
 
   if (isUser) {
     return (
-      <div
-        className={cn("flex flex-col", isUser ? "items-end" : "items-start")}
-      >
-        {files ? (
-          <div className="mb-1 flex flex-wrap gap-2">
-            {files.map((file, index) => {
-              return <FilePreview file={file} key={index} />
-            })}
+      <div className="mb-4 flex flex-col space-y-2">
+        <div className={cn("flex", isUser ? "justify-end" : "justify-start")}>
+          {!isUser && <ChatAvatar role={role} className="mr-2 mb-auto mt-1" />}
+          
+          <div className="flex flex-col">
+            {files ? (
+              <div className="mb-1 flex flex-wrap gap-2">
+                {files.map((file, index) => {
+                  return <FilePreview file={file} key={index} />
+                })}
+              </div>
+            ) : null}
+
+            <div 
+              className={cn(
+                chatBubbleVariants({ isUser, animation }),
+                isUser ? "rounded-tr-none" : "rounded-tl-none",
+                "max-w-md md:max-w-2xl"
+              )}
+            >
+              <MarkdownRenderer>{content}</MarkdownRenderer>
+            </div>
+
+            {showTimeStamp && createdAt ? (
+              <time
+                dateTime={createdAt.toISOString()}
+                className={cn(
+                  "mt-1 block px-1 text-xs opacity-50",
+                  animation !== "none" && "duration-500 animate-in fade-in-0",
+                  isUser ? "text-right" : "text-left"
+                )}
+              >
+                {formattedTime}
+              </time>
+            ) : null}
           </div>
-        ) : null}
-
-        <div className={cn(chatBubbleVariants({ isUser, animation }))}>
-          <MarkdownRenderer>{content}</MarkdownRenderer>
+          
+          {isUser && <ChatAvatar role={role} className="ml-2 mb-auto mt-1" />}
         </div>
-
-        {showTimeStamp && createdAt ? (
-          <time
-            dateTime={createdAt.toISOString()}
-            className={cn(
-              "mt-1 block px-1 text-xs opacity-50",
-              animation !== "none" && "duration-500 animate-in fade-in-0"
-            )}
-          >
-            {formattedTime}
-          </time>
-        ) : null}
       </div>
     )
   }
@@ -183,33 +197,44 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
     return parts.map((part, index) => {
       if (part.type === "text") {
         return (
-          <div
-            className={cn(
-              "flex flex-col",
-              isUser ? "items-end" : "items-start"
-            )}
-            key={`text-${index}`}
-          >
-            <div className={cn(chatBubbleVariants({ isUser, animation }))}>
-              <MarkdownRenderer>{part.text}</MarkdownRenderer>
-              {actions ? (
-                <div className="absolute -bottom-4 right-2 flex space-x-1 rounded-lg border bg-background p-1 text-foreground opacity-0 transition-opacity group-hover/message:opacity-100">
-                  {actions}
+          <div className="mb-4 flex flex-col space-y-2" key={`text-${index}`}>
+            <div className={cn("flex", isUser ? "justify-end" : "justify-start")}>
+              {!isUser && <ChatAvatar role={role} className="mr-2 mb-auto mt-1" />}
+              
+              <div className="flex flex-col">
+                <div 
+                  className={cn(
+                    chatBubbleVariants({ isUser, animation }),
+                    isUser ? "rounded-tr-none" : "rounded-tl-none",
+                    "max-w-md md:max-w-2xl",
+                    "relative"
+                  )}
+                >
+                  <MarkdownRenderer>{part.text}</MarkdownRenderer>
+                  
+                  {actions ? (
+                    <div className="absolute -bottom-4 right-2 flex space-x-1 rounded-lg border bg-background p-1 text-foreground opacity-0 transition-opacity group-hover/message:opacity-100">
+                      {actions}
+                    </div>
+                  ) : null}
                 </div>
-              ) : null}
-            </div>
 
-            {showTimeStamp && createdAt ? (
-              <time
-                dateTime={createdAt.toISOString()}
-                className={cn(
-                  "mt-1 block px-1 text-xs opacity-50",
-                  animation !== "none" && "duration-500 animate-in fade-in-0"
-                )}
-              >
-                {formattedTime}
-              </time>
-            ) : null}
+                {showTimeStamp && createdAt ? (
+                  <time
+                    dateTime={createdAt.toISOString()}
+                    className={cn(
+                      "mt-1 block px-1 text-xs opacity-50",
+                      animation !== "none" && "duration-500 animate-in fade-in-0",
+                      isUser ? "text-right" : "text-left"
+                    )}
+                  >
+                    {formattedTime}
+                  </time>
+                ) : null}
+              </div>
+              
+              {isUser && <ChatAvatar role={role} className="ml-2 mb-auto mt-1" />}
+            </div>
           </div>
         )
       } else if (part.type === "reasoning") {
@@ -231,27 +256,44 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   }
 
   return (
-    <div className={cn("flex flex-col", isUser ? "items-end" : "items-start")}>
-      <div className={cn(chatBubbleVariants({ isUser, animation }))}>
-        <MarkdownRenderer>{content}</MarkdownRenderer>
-        {actions ? (
-          <div className="absolute -bottom-4 right-2 flex space-x-1 rounded-lg border bg-background p-1 text-foreground opacity-0 transition-opacity group-hover/message:opacity-100">
-            {actions}
+    <div className="mb-4 flex flex-col space-y-2">
+      <div className={cn("flex", isUser ? "justify-end" : "justify-start")}>
+        {!isUser && <ChatAvatar role={role} className="mr-2 mb-auto mt-1" />}
+        
+        <div className="flex flex-col">
+          <div 
+            className={cn(
+              chatBubbleVariants({ isUser, animation }),
+              isUser ? "rounded-tr-none" : "rounded-tl-none",
+              "max-w-md md:max-w-2xl",
+              "relative"
+            )}
+          >
+            <MarkdownRenderer>{content}</MarkdownRenderer>
+            
+            {actions ? (
+              <div className="absolute -bottom-4 right-2 flex space-x-1 rounded-lg border bg-background p-1 text-foreground opacity-0 transition-opacity group-hover/message:opacity-100">
+                {actions}
+              </div>
+            ) : null}
           </div>
-        ) : null}
-      </div>
 
-      {showTimeStamp && createdAt ? (
-        <time
-          dateTime={createdAt.toISOString()}
-          className={cn(
-            "mt-1 block px-1 text-xs opacity-50",
-            animation !== "none" && "duration-500 animate-in fade-in-0"
-          )}
-        >
-          {formattedTime}
-        </time>
-      ) : null}
+          {showTimeStamp && createdAt ? (
+            <time
+              dateTime={createdAt.toISOString()}
+              className={cn(
+                "mt-1 block px-1 text-xs opacity-50",
+                animation !== "none" && "duration-500 animate-in fade-in-0",
+                isUser ? "text-right" : "text-left"
+              )}
+            >
+              {formattedTime}
+            </time>
+          ) : null}
+        </div>
+        
+        {isUser && <ChatAvatar role={role} className="ml-2 mb-auto mt-1" />}
+      </div>
     </div>
   )
 }
@@ -266,7 +308,7 @@ const ReasoningBlock = ({ part }: { part: ReasoningPart }) => {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <div className="mb-2 flex flex-col items-start sm:max-w-[70%]">
+    <div className="mb-2 flex flex-col items-start max-w-md md:max-w-2xl">
       <Collapsible
         open={isOpen}
         onOpenChange={setIsOpen}
